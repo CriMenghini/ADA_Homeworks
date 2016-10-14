@@ -101,7 +101,7 @@ def retrieve_data(url):
     
     @url : the url we are going to do the request
     
-    and returns all tha frames which contained the data of interest (still dirty)"""
+    and returns all the frames containing the data of interest (still dirty)"""
     
     # Make the request
     req = requests.get(url)

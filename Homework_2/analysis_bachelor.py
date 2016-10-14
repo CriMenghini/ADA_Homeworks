@@ -43,9 +43,9 @@ def extract_students(frame):
     
     # For each group
     for g in grouped_data.groups:
-        # We extract the Pedagocic periods 
+        # We extract the Pedagocic periods
         period_attended = grouped_data.get_group(g)['Pedagogic period']
-        # Wheater both Semester 1 and semester 6 are included we select the student
+        # Whether both Semester 1 and semester 6 are included we select the student
         if sum(bachelor.isin(period_attended)) == 2:
             students.append(g)
     
