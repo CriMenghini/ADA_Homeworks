@@ -62,7 +62,7 @@ def fun_rec(indexes, df_init, df_new = []):
         return (df_new)
         
 
-def clean_df(df, path, start_year = 2007):
+def clean_df(df, path, start_year = 2007, finish_year = 2015):
     """This function take as input the dataframe retrieved from IS-Academia. It returns the cleaned df and 
     saves it in a .csv file.
     
@@ -75,7 +75,7 @@ def clean_df(df, path, start_year = 2007):
     info_split = info.split(',')
     
     # We save only the df related to the years of interest
-    if int(info_split[1][:5]) >= start_year:
+    if start_year <= int(info_split[1][:5]) <= finish_year:
     
         # Redefine the columns names, in particular they correspond to the 2nd row of the df
         df.columns = df.iloc[1]
