@@ -37,7 +37,7 @@ def create_map_df(col_1, col_2):
             (Total grant)"""
     
     # Define the entry for the df
-    df_data = {'Cantons': col_1, 'Total grants': col_2}
+    df_data = {'Canton': col_1, 'Total grants': col_2}
     
     # Create the df
     cantons_data = pd.DataFrame(df_data)
