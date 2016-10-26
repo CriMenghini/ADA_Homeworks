@@ -33,4 +33,5 @@ def overlay_map(df, color, topo_path):
                            legend_name = 'Total grants',
                            topojson = 'objects.cantons')
     
+    switzerland_map
     switzerland_map.save('Viz_map_html_form/overlaid_map.html')
