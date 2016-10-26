@@ -43,3 +43,17 @@ def create_map_df(col_1, col_2):
     cantons_data = pd.DataFrame(df_data)
     
     return cantons_data
+
+def extract_canton(info_list_dict):
+    """ This function returns the ID of the canton where the universy is settled.
+    It takes as input:
+    
+    @info_list_dict : is the dictionary returned by Google API that contains
+                      information about the address of the place"""
+    
+    # For each element in the disctionary
+    for info in info_list_dict:
+        # We keep those which have the information of the canton.
+        for elem in info['types']:
+            if elem == 'administrative_area_level_1':
+                return info['short_name']
