@@ -50,7 +50,7 @@ def create_map_df(col_1, col_2):
     return cantons_data
 
 
-def fetch_data(universities, google_places):
+def fetch_data(universities, google_places, num):
     """ This function fetch data from GoogleMaps. In particular it returns a dictionary structured as follows:
     
                             {University : {Location : x, 'Canton' : y, 'Web site': i}}
@@ -58,7 +58,8 @@ def fetch_data(universities, google_places):
         and save the data (.json) into the Data dir.
         It takes as input:
         
-        @list_universities: the list of universities of interest"""
+        @list_universities: the list of universities of interest
+        @num: numero del file"""
     
     university_dict = {}
     for uni in universities:
@@ -89,7 +90,7 @@ def fetch_data(universities, google_places):
             university_dict[uni] = {'Location': geo_loc, 'Canton' : canton, 'Web site' : web_site}
         
         # Save the file
-        with open('Data/university_cantons_info_1.json', 'w') as file:
+        with open('Data/university_cantons_info_'+ str(num) + '.json', 'w') as file:
             file.write(simplejson.dumps(university_dict))
         
     return university_dict

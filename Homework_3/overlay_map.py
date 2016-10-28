@@ -27,7 +27,6 @@ def overlay_map(df, color, topo_path):
                            data = df,
                            columns = ['Canton', 'Total grants'],
                            key_on = 'feature.id',
-                           threshold_scale = [0, 0.25, 0.50, 0.75]
                            fill_color = color,
                            fill_opacity = 0.7,
                            line_opacity = 0.2,
