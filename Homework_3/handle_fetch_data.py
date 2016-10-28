@@ -12,6 +12,7 @@ import pandas as pd
 from decimal import Decimal
 from googleplaces import GooglePlaces, types, lang
 
+
 def parse_topojson(path):
     """ This function returns the sorted list of cantons' ID.
     It take as input:
@@ -49,7 +50,7 @@ def create_map_df(col_1, col_2):
     return cantons_data
 
 
-def fetch_data(universities):
+def fetch_data(universities, google_places):
     """ This function fetch data from GoogleMaps. In particular it returns a dictionary structured as follows:
     
                             {University : {Location : x, 'Canton' : y, 'Web site': i}}
@@ -60,7 +61,8 @@ def fetch_data(universities):
         @list_universities: the list of universities of interest"""
     
     university_dict = {}
-    for uni in universities[:]:
+    for uni in universities:
+        print (uni)
         # Make the request
         query = google_places.text_search(uni, location = 'Switzerland')
         
@@ -87,10 +89,10 @@ def fetch_data(universities):
             university_dict[uni] = {'Location': geo_loc, 'Canton' : canton, 'Web site' : web_site}
         
         # Save the file
-        with open('Data/university_cantons_info.json', 'w') as file:
+        with open('Data/university_cantons_info_1.json', 'w') as file:
             file.write(simplejson.dumps(university_dict))
         
-        return university_dict
+    return university_dict
 
     
 def extract_canton(info_list_dict):
