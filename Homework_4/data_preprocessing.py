@@ -47,7 +47,17 @@ def preprocess_labels(label):
     
     return label
     
+
+def encode_string_variable(df, attribute):
     
+    df[attribute] = df[attribute].fillna('Unknown')
+    
+    le = preprocessing.LabelEncoder()
+    
+    le.fit(df[attribute])
+    
+    df[attribute] = le.transform(df[attribute]) 
+
     
     
 def create_bins(df, attribute):
