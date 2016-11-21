@@ -134,3 +134,60 @@ def categorisation(bins_intervals,x):
     # Whether the variable is in any interval, it means that is equal to the 
     # right endpoint of the last interval.
     return classes[-1]   
+    
+    
+    
+def remove_nans(data_clean, variables_with_nan, players_attributes):
+    """ The function returns the input dataframe cleaned from NaNs. 
+    It takes as inputs:
+    @data_clean: dataframe to process
+    @variables_with_nan: dictionary (key:values) key = feature,
+                         values = index of nulls
+    @players_attributes: list of player's attributes
+    
+    ----------------------------------------------------------------
+    The cleaning procedure provides two steps.
+    
+    The first check the possibility of imputing the missing values:
+    - for 'object' variable by using the first value, since we verify 
+      that each player registers only one position
+    - for the 'numeircal' we use the median since it is more robust 
+      than the mean
+    The second drops the dyads whose values have not been imputed.
+    --------------------------------------------------------------"""
+
+    for attribute in players_attributes:
+
+        # Get the list of players without attribute's entry
+        players_without_attribute = data_clean[variables_with_nan[attribute]]['playerShort'].unique()
+
+        # For each player verify if none dyads contain the information
+        for player in players_without_attribute:
+            # get number of dyads
+            number_dyads = len(data_clean[data_clean['playerShort'] == player][attribute])        
+            # Get the index of empty dyads
+            index_empty_dyads = data_clean[data_clean['playerShort'] == player][attribute].isnull()
+            number_empty_dyads = sum(index_empty_dyads)
+            
+            # If the number of dyads is different from the number of empty dyads we infer the value
+            if number_dyads != number_empty_dyads:
+                # Get the index of the not empty dyads
+                index_full_dyads = data_clean[data_clean['playerShort'] == player][attribute].notnull()
+                data_full = data_clean[index_full_dyads]
+                
+                # Check which kind of attribute we are dealing with
+                if data_clean[attribute].dtypes == 'O':            
+                    # Whether it is a strin replace the nulls with the first value
+                    replace_value = data_full[attribute][0]
+                    data_clean[attribute] = data_clean[attribute].fillna(replace_value)
+                
+                else:
+                    # Whether is a number replace the nulls with the median
+                    replace_value = data_full[attribute].median()
+                    data_clean[attribute] = data_clean[attribute].fillna(replace_value)
+
+    # Hence we check again for the presence of NaNs in these variable and we proceed dropping the players 
+    #whose values have not been imputed
+    data_clean = data_clean.dropna(axis=0, subset=['height', 'weight', 'position'])
+    
+    return data_clean
