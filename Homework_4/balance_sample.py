@@ -29,10 +29,17 @@ def cross_validation(df, labels, estimators, depth):
     no_splits = 10
     kf = KFold(n_splits = no_splits, shuffle = True, random_state = 1)
 
-    prediction_accuracy = []
-    prediction_precision = []
-    prediction_f_score = []
-    prediction_recall = []
+    prediction_accuracy_train = []
+    prediction_precision_train = []
+    prediction_f_score_train = []
+    prediction_recall_train = []
+    prediction_roc_train = []
+
+    prediction_accuracy_test = []
+    prediction_precision_test = []
+    prediction_f_score_test = []
+    prediction_recall_test = []
+    prediction_roc_test = []
 
     for train_index, test_index in kf.split(df):
 
@@ -46,12 +53,23 @@ def cross_validation(df, labels, estimators, depth):
 
         forest = RandomForestClassifier(n_estimators=estimators, max_depth=depth, random_state=1, class_weight='balanced')
         train_fit = forest.fit(X_train, y_train, sample_weight = train_sample_weights)
-        prediction = train_fit.predict(X_test)
-
-
-        prediction_accuracy += [metrics.accuracy_score(y_test, prediction, sample_weight=test_sample_weights)]
-        prediction_precision += [metrics.precision_score(y_test, prediction, sample_weight=test_sample_weights)] 
-        prediction_f_score += [metrics.f1_score(y_test, prediction, sample_weight=test_sample_weights)] 
-        prediction_recall += [metrics.recall_score(y_test, prediction, sample_weight=test_sample_weights)]  
         
-    return prediction_accuracy, prediction_precision, prediction_f_score, prediction_recall
+        prediction_train = train_fit.predict(X_train)
+        prediction_test = train_fit.predict(X_test)
+
+
+        prediction_accuracy_train += [metrics.accuracy_score(y_train, prediction_train, sample_weight=train_sample_weights)]
+        prediction_precision_train += [metrics.precision_score(y_train, prediction_train, sample_weight=train_sample_weights)] 
+        prediction_f_score_train += [metrics.f1_score(y_train, prediction_train, sample_weight=train_sample_weights)] 
+        prediction_recall_train += [metrics.recall_score(y_train, prediction_train, sample_weight=train_sample_weights)]  
+        prediction_roc_train += [metrics.roc_auc_score(y_train, prediction_train, sample_weight=train_sample_weights)]
+        
+
+
+        prediction_accuracy_test += [metrics.accuracy_score(y_test, prediction_test, sample_weight=test_sample_weights)]
+        prediction_precision_test += [metrics.precision_score(y_test, prediction_test, sample_weight=test_sample_weights)] 
+        prediction_f_score_test += [metrics.f1_score(y_test, prediction_test, sample_weight=test_sample_weights)] 
+        prediction_recall_test += [metrics.recall_score(y_test, prediction_test, sample_weight=test_sample_weights)]  
+        prediction_roc_test += [metrics.roc_auc_score(y_test, prediction_test, sample_weight=test_sample_weights)]
+        
+    return prediction_accuracy_train, prediction_precision_train, prediction_f_score_train, prediction_recall_train, prediction_roc_train,prediction_accuracy_test, prediction_precision_test, prediction_f_score_test, prediction_recall_test,prediction_roc_test
