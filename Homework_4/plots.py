@@ -47,3 +47,18 @@ def stacked_plot(label_1, label_2):
 
     fig = go.Figure(data=data, layout=layout)
     py.iplot(fig, filename='stacked-bar')
+    
+    
+def error_bars(couples_estimators, average_f_score, std_f_score):
+    data = [
+        go.Scatter(
+            x = list(range(len(couples_estimators))),
+            y = average_f_score,
+            error_y=dict(
+                type='data',
+                array = std_f_score,
+                visible=True
+            )
+        )
+    ]
+    py.iplot(data, filename='error-bar-asymmetric-array')

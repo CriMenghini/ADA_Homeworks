@@ -27,7 +27,7 @@ def weight_sample(labels):
 def cross_validation(df, labels, estimators, depth):
     
     no_splits = 10
-    kf = KFold(n_splits = no_splits, shuffle = True)
+    kf = KFold(n_splits = no_splits, shuffle = True, random_state = 1)
 
     prediction_accuracy = []
     prediction_precision = []
@@ -48,9 +48,10 @@ def cross_validation(df, labels, estimators, depth):
         train_fit = forest.fit(X_train, y_train, sample_weight = train_sample_weights)
         prediction = train_fit.predict(X_test)
 
-        prediction_accuracy = [metrics.accuracy_score(y_test, prediction, sample_weight=test_sample_weights)] + prediction_accuracy
-        prediction_precision = [metrics.precision_score(y_test, prediction, sample_weight=test_sample_weights)] + prediction_precision
-        prediction_f_score = [metrics.f1_score(y_test, prediction, sample_weight=test_sample_weights)] + prediction_f_score
-        prediction_recall = [metrics.recall_score(y_test, prediction, sample_weight=test_sample_weights)] + prediction_recall 
+
+        prediction_accuracy += [metrics.accuracy_score(y_test, prediction, sample_weight=test_sample_weights)]
+        prediction_precision += [metrics.precision_score(y_test, prediction, sample_weight=test_sample_weights)] 
+        prediction_f_score += [metrics.f1_score(y_test, prediction, sample_weight=test_sample_weights)] 
+        prediction_recall += [metrics.recall_score(y_test, prediction, sample_weight=test_sample_weights)]  
         
     return prediction_accuracy, prediction_precision, prediction_f_score, prediction_recall
