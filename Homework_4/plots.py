@@ -6,24 +6,37 @@ Created on Mon Nov 21 16:57:33 2016
 """
 
 # Import useful libraries
-import pandas as pd
 import numpy as np
-import seaborn as sns 
 import plotly.plotly as py
 import plotly.graph_objs as go
 
 
-def label_boxplot(label_1, label_2):
-    
-    labels = label_1.append(label_2)
-    raters = [int(2) if i > 1418 else int(1) for i in range(len(labels))]
-    df_label = pd.DataFrame(np.array([labels,raters]).T, columns=['Label', 'Rater'])
-    
-    sns.set(style="ticks")
+def boxplot_raters(label_1, label_2): 
+    y0 = np.array(label_1)
+    y1 = np.array(label_2)
 
-    # Draw a nested boxplot to show the distribution of labels by rater
-    sns.boxplot(x="Rater", y="Label", hue="Rater", data=df_label, palette="PRGn")
-    sns.despine(offset=10, trim=True)
+    trace0 = go.Box(
+        name = 'Rater 1',
+        y=y0
+    )
+    trace1 = go.Box(
+        y=y1,
+        name = 'Rater 2'
+    )
+    data = [trace0, trace1]
+    layout = go.Layout(
+                title='Distribution of the scores given by the raters',
+                xaxis=dict(
+                    title='Raters'
+                ),
+                yaxis=dict(
+                    title='Scores'
+                ),
+            )
+    fig = go.Figure(data=data, layout=layout)
+    py.iplot(fig, filename='rater-distr')
+
+
     
 
 def stacked_plot(label_1, label_2):
@@ -41,8 +54,17 @@ def stacked_plot(label_1, label_2):
     )
 
     data = [trace1, trace2]
+    
     layout = go.Layout(
-        barmode='stack'
+        barmode='stack',
+        title = 'Cumulative percentage of skin tone classes present in the sample',
+         yaxis = dict(
+                    title='Cumulaative percentage'
+                ),
+                  xaxis = dict(
+                    title='Skin tone'
+                )
+        
     )
 
     fig = go.Figure(data=data, layout=layout)
@@ -61,7 +83,19 @@ def error_bars(couples_estimators, average_f_score, std_f_score):
             )
         )
     ]
-    py.iplot(data, filename='error-bar-asymmetric-array')
+    
+    layout = dict(title = 'Standard deviation of Fbeta scores',
+                  yaxis = dict(
+                    title='FBeta'
+                ),
+                  xaxis = dict(
+                    title='Parameters combinations'
+                )
+                 )
+                 
+    
+    fig = go.Figure(data=data, layout=layout)  
+    py.iplot(fig, filename='error-bar-asymmetric-array')
     
     
 def bubble_plot(labels, players, additional_attr, fun_add, attr_x, fun_x, attr_y, fun_y):
@@ -282,3 +316,108 @@ def scatter_plot(players, labels):
 
     fig = dict(data=data, layout=layout)
     py.iplot(fig, filename='styled-scatter-y')
+    
+    
+def train_test_plot(couples_estimators, average_roc_train, average_roc_test, average_fbeta_train, average_fbeta_test, plot_name):
+    
+    random_x = np.array(range(len(couples_estimators)))
+    random_y0 = np.array(average_roc_train)
+    random_y1 = np.array(average_roc_test)
+    random_y2 = np.array(average_fbeta_train)
+    random_y3 = np.array(average_fbeta_test)
+
+
+    # Create traces
+    trace0 = go.Scatter(
+        x = random_x,
+        y = random_y0,
+        mode = 'lines',
+        name = 'Train ROC score'
+    )
+    trace1 = go.Scatter(
+        x = random_x,
+        y = random_y1,
+        mode = 'lines+markers',
+        name = 'Test ROC score'
+    )
+    trace2 = go.Scatter(
+        x = random_x,
+        y = random_y2,
+        mode = 'lines',
+        name = 'Train Fbeta-score'
+    )
+    trace3 = go.Scatter(
+        x = random_x,
+        y = random_y3,
+        mode = 'lines+markers',
+        name = 'Test Fbeta-score'
+    )
+
+    data = [trace0, trace1, trace2, trace3]
+    layout = go.Layout(
+            title='Compare train and test AUC and Fbeta',
+             xaxis=dict(
+            title='Couple of parameters'
+            ),
+            yaxis=dict(
+                title='AUC, Fbeta'
+            ))
+    # Plot and embed in ipython notebook!
+    fig = go.Figure(data=data, layout=layout)
+    py.iplot(fig, filename=plot_name)
+    
+    
+def plot_cv_scores(n_fold, cv_scores):
+    
+    folds = ['Fold'+ str(i) for i in range(1,n_fold+1)]
+
+    # Create and style traces
+    trace0 = go.Scatter(
+        x = folds,
+        y = cv_scores,
+        name = 'F',
+        line = dict(
+            color = ('rgb(205, 12, 24)'),
+            width = 4)
+    )
+
+    data = [trace0]
+
+    # Edit the layout
+    layout = dict(title = 'F score in each folder',
+                  xaxis = dict(title = 'Fold'),
+                  yaxis = dict(title = 'F score'),
+                  )
+
+    # Plot and embed in ipython notebook!
+    fig = dict(data=data, layout=layout)
+    py.iplot(fig, filename='auc-cv')
+    
+def plot_features_importance(players, importances):
+    
+    trace0 = go.Bar(
+    x=list(players.columns),
+    y=list(importances),
+    marker=dict(
+        color=['rgba(222,45,38,0.8)', 'rgba(204,204,204,1)',
+               'rgba(204,204,204,1)', 'rgba(204,204,204,1)',
+               'rgba(222,45,38,0.8)', 'rgba(222,45,38,0.8)', 
+               'rgba(204,204,204,1)', 'rgba(222,45,38,0.8)', 
+               'rgba(204,204,204,1)', 'rgba(222,45,38,0.8)',
+               'rgba(204,204,204,1)','rgba(204,204,204,1)',
+               'rgba(204,204,204,1)','rgba(222,45,38,0.8)']),
+    )
+
+    data = [trace0]
+    layout = go.Layout(
+        title='Feature importance',
+        xaxis=dict(
+                title='Features'
+                ),
+                yaxis=dict(
+                    title='Importance'
+                )
+    )
+
+    fig = go.Figure(data=data, layout=layout)
+    py.iplot(fig, filename='color-bar')

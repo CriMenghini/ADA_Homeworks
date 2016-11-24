@@ -7,7 +7,6 @@ Created on Mon Nov 21 22:59:06 2016
 
 # Import useful libraries
 import numpy as np
-import pandas as pd
 from sklearn import metrics
 from sklearn.model_selection import KFold
 from sklearn.ensemble import RandomForestClassifier
@@ -29,17 +28,11 @@ def cross_validation(df, labels, estimators, depth):
     no_splits = 10
     kf = KFold(n_splits = no_splits, shuffle = True, random_state = 1)
 
-    prediction_accuracy_train = []
-    prediction_precision_train = []
-    prediction_f_score_train = []
-    prediction_recall_train = []
     prediction_roc_train = []
+    prediction_fbeta_train = []
 
-    prediction_accuracy_test = []
-    prediction_precision_test = []
-    prediction_f_score_test = []
-    prediction_recall_test = []
     prediction_roc_test = []
+    prediction_fbeta_test = []
 
     for train_index, test_index in kf.split(df):
 
@@ -49,7 +42,6 @@ def cross_validation(df, labels, estimators, depth):
         y_test = labels.iloc[test_index]
 
         train_sample_weights = weight_sample(y_train)
-        test_sample_weights = weight_sample(y_test)
 
         forest = RandomForestClassifier(n_estimators=estimators, max_depth=depth, random_state=1, class_weight='balanced')
         train_fit = forest.fit(X_train, y_train, sample_weight = train_sample_weights)
@@ -58,18 +50,45 @@ def cross_validation(df, labels, estimators, depth):
         prediction_test = train_fit.predict(X_test)
 
 
-        prediction_accuracy_train += [metrics.accuracy_score(y_train, prediction_train, sample_weight=train_sample_weights)]
-        prediction_precision_train += [metrics.precision_score(y_train, prediction_train, sample_weight=train_sample_weights)] 
-        prediction_f_score_train += [metrics.f1_score(y_train, prediction_train, sample_weight=train_sample_weights)] 
-        prediction_recall_train += [metrics.recall_score(y_train, prediction_train, sample_weight=train_sample_weights)]  
-        prediction_roc_train += [metrics.roc_auc_score(y_train, prediction_train, sample_weight=train_sample_weights)]
+        prediction_roc_train += [metrics.roc_auc_score(y_train, prediction_train)]
+        prediction_fbeta_train += [metrics.fbeta_score(y_train, prediction_train, beta=1.2)]
+
+        prediction_roc_test += [metrics.roc_auc_score(y_test, prediction_test)]
+        prediction_fbeta_test += [metrics.fbeta_score(y_test, prediction_test, beta=1.2)]
         
+    return prediction_roc_train, prediction_fbeta_train, prediction_roc_test, prediction_fbeta_test
+    
+
+def tuning_cv(players, labels, list_depths = range(3,50, 2), list_numbers_estimators = range(2,100, 5)):
+    
+    average_roc_train = []
+    std_roc_train = []
+    average_fbeta_train = []
+    std_fbeta_train = []
+
+    average_roc_test = []
+    std_roc_test = []
+    average_fbeta_test = []
+    std_fbeta_test = []
+
+    couples_estimators = []
+
+    for estimator in list_numbers_estimators:
+        for depth in list_depths:
+            couples_estimators += [(estimator, depth)]
+            
+
+            cv = cross_validation(players, labels, estimator, depth)
+
+            average_roc_train += [np.mean(cv[0])]
+            std_roc_train += [np.std(cv[0])]
+            average_fbeta_train += [np.mean(cv[1])]
+            std_fbeta_train += [np.std(cv[1])]
 
 
-        prediction_accuracy_test += [metrics.accuracy_score(y_test, prediction_test, sample_weight=test_sample_weights)]
-        prediction_precision_test += [metrics.precision_score(y_test, prediction_test, sample_weight=test_sample_weights)] 
-        prediction_f_score_test += [metrics.f1_score(y_test, prediction_test, sample_weight=test_sample_weights)] 
-        prediction_recall_test += [metrics.recall_score(y_test, prediction_test, sample_weight=test_sample_weights)]  
-        prediction_roc_test += [metrics.roc_auc_score(y_test, prediction_test, sample_weight=test_sample_weights)]
-        
-    return prediction_accuracy_train, prediction_precision_train, prediction_f_score_train, prediction_recall_train, prediction_roc_train,prediction_accuracy_test, prediction_precision_test, prediction_f_score_test, prediction_recall_test,prediction_roc_test
+            average_roc_test += [np.mean(cv[2])]
+            std_roc_test += [np.std(cv[2])]
+            average_fbeta_test += [np.mean(cv[3])]
+            std_fbeta_test += [np.std(cv[3])]   
+            
+    return average_roc_train, std_roc_train, average_fbeta_train, std_fbeta_train, average_roc_test, std_roc_test, average_fbeta_test, std_fbeta_test, couples_estimators
