@@ -7,8 +7,11 @@ Created on Mon Nov 21 22:59:06 2016
 
 # Import useful libraries
 import numpy as np
+import pandas as pd
 from sklearn import metrics
+import matplotlib.pyplot as plt 
 from sklearn.model_selection import KFold
+from sklearn.model_selection import learning_curve
 from sklearn.ensemble import RandomForestClassifier
 
 
@@ -92,3 +95,109 @@ def tuning_cv(players, labels, list_depths = range(3,50, 2), list_numbers_estima
             std_fbeta_test += [np.std(cv[3])]   
             
     return average_roc_train, std_roc_train, average_fbeta_train, std_fbeta_train, average_roc_test, std_roc_test, average_fbeta_test, std_fbeta_test, couples_estimators
+
+
+def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
+                        n_jobs=1, train_sizes=np.linspace(.1, 1.0, 5)):
+    """
+    Generate a simple plot of the test and training learning curve.
+
+    Parameters
+    ----------
+    estimator : object type that implements the "fit" and "predict" methods
+        An object of that type which is cloned for each validation.
+
+    title : string
+        Title for the chart.
+
+    X : array-like, shape (n_samples, n_features)
+        Training vector, where n_samples is the number of samples and
+        n_features is the number of features.
+
+    y : array-like, shape (n_samples) or (n_samples, n_features), optional
+        Target relative to X for classification or regression;
+        None for unsupervised learning.
+
+    ylim : tuple, shape (ymin, ymax), optional
+        Defines minimum and maximum yvalues plotted.
+
+    cv : int, cross-validation generator or an iterable, optional
+        Determines the cross-validation splitting strategy.
+        Possible inputs for cv are:
+          - None, to use the default 3-fold cross-validation,
+          - integer, to specify the number of folds.
+          - An object to be used as a cross-validation generator.
+          - An iterable yielding train/test splits.
+
+        For integer/None inputs, if ``y`` is binary or multiclass,
+        :class:`StratifiedKFold` used. If the estimator is not a classifier
+        or if ``y`` is neither binary nor multiclass, :class:`KFold` is used.
+
+        Refer :ref:`User Guide <cross_validation>` for the various
+        cross-validators that can be used here.
+
+    n_jobs : integer, optional
+        Number of jobs to run in parallel (default 1).
+    """
+    plt.figure()
+    plt.title(title)
+    if ylim is not None:
+        plt.ylim(*ylim)
+    plt.xlabel("Training examples")
+    plt.ylabel("Score")
+    train_sizes, train_scores, test_scores = learning_curve(
+        estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
+    train_scores_mean = np.mean(train_scores, axis=1)
+    train_scores_std = np.std(train_scores, axis=1)
+    test_scores_mean = np.mean(test_scores, axis=1)
+    test_scores_std = np.std(test_scores, axis=1)
+    plt.grid()
+
+    plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
+                     train_scores_mean + train_scores_std, alpha=0.1,
+                     color="r")
+    plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
+                     test_scores_mean + test_scores_std, alpha=0.1, color="g")
+    plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
+             label="Training score")
+    plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
+             label="Cross-validation score")
+
+    plt.legend(loc="best")
+    return plt    
+    
+def users_chunks(n, users_list):
+    """This function returns the list of chunks that will be used during the multi-threading.
+    - n is the number of threads;
+    - user_list is the list of user to split."""
+    num = float(len(users_list))/n 
+    us_lists = [ users_list [i:i + int(num)] for i in range(0, (n-1)*int(num), int(num))]
+    us_lists.append(users_list[(n-1)*int(num):])
+    return us_lists
+    
+def create_df(X_class_0, X_class_1, y_train, indexes, n_df=5):
+    
+    list_df = []
+    list_y = []
+    
+    for i in range(n_df):  
+        df_new = pd.concat([X_class_0.iloc[indexes[i]], X_class_1], axis = 0)
+        list_df += [df_new]
+        list_y += [y_train[df_new.index]]
+        
+    return list_df[0], list_y[0], list_df[1], list_y[1], list_df[2], list_y[2], list_df[3], list_y[3], list_df[4], list_y[4]
+    
+
+def voting_procedure(prediction_df):
+    average_model_predictions = []
+    for i in prediction_df.columns:
+        #print (i)
+        occurrences = prediction_df[i].value_counts()
+        if len(occurrences) == 1:
+            average_model_predictions += [occurrences.index[0]]
+        else:
+            if np.any(occurrences[occurrences.index == 1] > occurrences[occurrences.index == 0]):
+                average_model_predictions += [1]
+            else:
+                average_model_predictions += [0]
+    return average_model_predictions

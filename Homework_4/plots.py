@@ -399,13 +399,13 @@ def plot_features_importance(players, importances):
     x=list(players.columns),
     y=list(importances),
     marker=dict(
-        color=['rgba(222,45,38,0.8)', 'rgba(204,204,204,1)',
-               'rgba(204,204,204,1)', 'rgba(204,204,204,1)',
+        color=['rgba(222,45,38,0.8)', 'rgba(222,45,38,0.8)',
+               'rgba(222,45,38,0.8)', 'rgba(222,45,38,0.8)',
                'rgba(222,45,38,0.8)', 'rgba(222,45,38,0.8)', 
-               'rgba(204,204,204,1)', 'rgba(222,45,38,0.8)', 
-               'rgba(204,204,204,1)', 'rgba(222,45,38,0.8)',
+               'rgba(204,204,204,1)', 'rgba(204,204,204,1)', 
+               'rgba(204,204,204,1)', 'rgba(204,204,204,1)',
                'rgba(204,204,204,1)','rgba(204,204,204,1)',
-               'rgba(204,204,204,1)','rgba(222,45,38,0.8)']),
+               'rgba(204,204,204,1)','rgba(204,204,204,1)']),
     )
 
     data = [trace0]
@@ -421,3 +421,62 @@ def plot_features_importance(players, importances):
 
     fig = go.Figure(data=data, layout=layout)
     py.iplot(fig, filename='color-bar')
+    
+    
+def balance_cv_plot(f1_score_X1, f1_score_X2, f1_score_X3, f1_score_X4, f1_score_X5, n_fold = 10):
+    folds = ['Fold'+ str(i) for i in range(1,n_fold+1)]
+
+    # Create and style traces
+    trace0 = go.Scatter(
+        x = folds,
+        y = f1_score_X1,
+        name = 'F score X1',
+        line = dict(
+            color = ('rgb(205, 12, 24)'),
+            width = 2)
+    )
+    trace1 = go.Scatter(
+        x = folds,
+        y = f1_score_X2,
+        name = 'F score X2',
+        line = dict(
+            color = ('rgb(22, 96, 167)'),
+            width = 2,)
+    )
+    trace2 = go.Scatter(
+        x = folds,
+        y = f1_score_X3,
+        name = 'F score X3',
+        line = dict(
+            color = ('rgb(205, 12, 24)'),
+            width = 2
+            )
+    )
+    trace3 = go.Scatter(
+        x = folds,
+        y = f1_score_X4,
+        name = 'F score X4',
+        line = dict(
+            color = ('rgb(22, 96, 167)'),
+            width = 2)
+    )
+    trace4 = go.Scatter(
+        x = folds,
+        y = f1_score_X5,
+        name = 'F score X5',
+        line = dict(
+            color = ('rgb(205, 12, 24)'),
+            width = 2)
+    )
+
+    data = [trace0, trace1, trace2, trace3, trace4]
+
+    # Edit the layout
+    layout = dict(title = 'CV scores',
+                  xaxis = dict(title = 'Folds'),
+                  yaxis = dict(title = 'F score'),
+                  )
+
+    # Plot and embed in ipython notebook!
+    fig = dict(data=data, layout=layout)
+    py.iplot(fig, filename='balance-cv')
