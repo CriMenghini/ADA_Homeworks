@@ -23,10 +23,10 @@ from sklearn.ensemble import RandomForestClassifier
 
 
 def weight_sample(labels):
-	""" This function returns the weight for each label.
-	
-	It takes as inputs:
-	@labels: the Series of the labels for our dataset"""
+    """ This function returns the weight for each label.
+    
+    It takes as inputs:
+    @labels: the Series of the labels for our dataset"""
     
     # Get the occurrences of each class
     weight_class = labels.value_counts()/len(labels)
@@ -56,28 +56,28 @@ def cross_validation(df, labels, estimators, depth):
     # Obtain the k-folds randomly
     kf = KFold(n_splits = no_splits, shuffle = True, random_state = 1)
 
-	# Initialise the list to store the ROC-AUC score on the train
+    # Initialise the list to store the ROC-AUC score on the train
     prediction_roc_train = []
     # Initialise the list to store the f-beta score on the train
     prediction_fbeta_train = []
 
-	# Initialise the same lists for the test
+    # Initialise the same lists for the test
     prediction_roc_test = []
     prediction_fbeta_test = []
 
-	# For each defined folds
+    # For each defined folds
     for train_index, test_index in kf.split(df):
-		
-		# Define the train and test X and Y
+        
+        # Define the train and test X and Y
         X_train = df.iloc[train_index]
         y_train = labels.iloc[train_index]
         X_test = df.iloc[test_index]
         y_test = labels.iloc[test_index]
-		
-		# Get the weights of the train
+        
+        # Get the weights of the train
         train_sample_weights = weight_sample(y_train)
 
-		# Define the 'balanced' classifier
+        # Define the 'balanced' classifier
         forest = RandomForestClassifier(n_estimators=estimators, max_depth=depth, random_state=1, class_weight='balanced')
         # Train it on the K-1 folds
         train_fit = forest.fit(X_train, y_train, sample_weight = train_sample_weights)
@@ -86,11 +86,11 @@ def cross_validation(df, labels, estimators, depth):
         prediction_train = train_fit.predict(X_train)
         prediction_test = train_fit.predict(X_test)
 
-		# Append the metrics to the initialised lists (train)
+        # Append the metrics to the initialised lists (train)
         prediction_roc_train += [metrics.roc_auc_score(y_train, prediction_train)]
         prediction_fbeta_train += [metrics.fbeta_score(y_train, prediction_train, beta=1.2)]
 
-		# Append the metrics to the initialised lists (test)
+        # Append the metrics to the initialised lists (test)
         prediction_roc_test += [metrics.roc_auc_score(y_test, prediction_test)]
         prediction_fbeta_test += [metrics.fbeta_score(y_test, prediction_test, beta=1.2)]
         
@@ -136,26 +136,26 @@ def tuning_cv(players, labels, list_depths = range(3,50, 2), list_numbers_estima
     average_fbeta_test = []
     std_fbeta_test = []
 
-	# Initialise the list to store the couple of parameters evaluated by the cv
+    # Initialise the list to store the couple of parameters evaluated by the cv
     couples_estimators = []
 
-	# Nested loop to try each couple of parameters
+    # Nested loop to try each couple of parameters
     for estimator in list_numbers_estimators:
         for depth in list_depths:
         
-        	# Append the couple of parameters
+            # Append the couple of parameters
             couples_estimators += [(estimator, depth)]
             
-			# Perform the cross-validation
+            # Perform the cross-validation
             cv = cross_validation(players, labels, estimator, depth)
 
-			# Compute and store the average metrics for the train
+            # Compute and store the average metrics for the train
             average_roc_train += [np.mean(cv[0])]
             std_roc_train += [np.std(cv[0])]
             average_fbeta_train += [np.mean(cv[1])]
             std_fbeta_train += [np.std(cv[1])]
 
-			# Compute and store the average metric for the test
+            # Compute and store the average metric for the test
             average_roc_test += [np.mean(cv[2])]
             std_roc_test += [np.std(cv[2])]
             average_fbeta_test += [np.mean(cv[3])]
@@ -164,7 +164,7 @@ def tuning_cv(players, labels, list_depths = range(3,50, 2), list_numbers_estima
     return average_roc_train, std_roc_train, average_fbeta_train, std_fbeta_train, average_roc_test, std_roc_test, average_fbeta_test, std_fbeta_test, couples_estimators
   
 """---------------------------------------------------------------------------------------
-						Function for balanced classifiers
+                        Function for balanced classifiers
 ---------------------------------------------------------------------------------------"""
 
 def players_chunks(n, player_list):
@@ -198,13 +198,13 @@ def create_df(X_class_0, X_class_1, y_train, indexes, n_df=5):
     @n_df: number of df to create
     """
     
-	# Initialise the lists of the new dfs and of the relative labels
+    # Initialise the lists of the new dfs and of the relative labels
     list_df = []
     list_y = []
     
     for i in range(n_df):
-    	# For each chuck of indexes concatenate the X_class_0 df with the entire X_class_1
-    	# on the rows.  
+        # For each chuck of indexes concatenate the X_class_0 df with the entire X_class_1
+        # on the rows.  
         df_new = pd.concat([X_class_0.iloc[indexes[i]], X_class_1], axis = 0)
         
         # Append the df and the labels to the already initialised lists.
@@ -215,13 +215,13 @@ def create_df(X_class_0, X_class_1, y_train, indexes, n_df=5):
     
 
 def voting_procedure(prediction_df):
-	""" This function average the predictions obtained by the different classifiers. In 
-	particular, it counts how many model classify the observation as 0 and how many as 1. 
-	The procedure assigns to the observation the class with more occurrences. It returns the
-	final predictions.
-	
-	It takes as input:
-	@prediction_df: the dataframe that contains the predictions returned by each classifier"""
+    """ This function average the predictions obtained by the different classifiers. In 
+    particular, it counts how many model classify the observation as 0 and how many as 1. 
+    The procedure assigns to the observation the class with more occurrences. It returns the
+    final predictions.
+    
+    It takes as input:
+    @prediction_df: the dataframe that contains the predictions returned by each classifier"""
     
     # Initialise the list of final prediction
     average_model_predictions = []
@@ -233,11 +233,11 @@ def voting_procedure(prediction_df):
         
         # Whether all classifiers predict the same class
         if len(occurrences) == 1:
-        	# Classify the player in the class that registers the occurrences
+            # Classify the player in the class that registers the occurrences
             average_model_predictions += [occurrences.index[0]]
         # Otherwise
         else:
-        	# Assign the class with the highest number of occurrences
+            # Assign the class with the highest number of occurrences
             if np.any(occurrences[occurrences.index == 1] > occurrences[occurrences.index == 0]):
                 average_model_predictions += [1]
             else:

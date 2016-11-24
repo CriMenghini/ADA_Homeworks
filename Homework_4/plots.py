@@ -13,41 +13,43 @@ Created on Mon Nov 21 16:57:33 2016
 
 # Import useful libraries
 import numpy as np
+import matplotlib.pyplot as plt 
 import plotly.plotly as py
 import plotly.graph_objs as go
+from sklearn.model_selection import learning_curve
 
 """---------------------------------------------------------------------------------------
-						Function to analyse the labels
+                Function to analyse the labels
 ---------------------------------------------------------------------------------------"""
 def boxplot_raters(label_1, label_2): 
-	""" This fuction return the boxplot of the distribution of the labels respect the two 
-	raters.
-	
-	It takes as inputs:
-	@label_1: the labels given by rater 1
-	@label_2: the labels given by rater 2"""
+    """ This fuction return the boxplot of the distribution of the labels respect the two 
+    raters.
+    
+    It takes as inputs:
+    @label_1: the labels given by rater 1
+    @label_2: the labels given by rater 2"""
     
     # Array to plot
     y0 = np.array(label_1)
     y1 = np.array(label_2)
 
-	# Define the box-plot related to rater 1
+    # Define the box-plot related to rater 1
     trace0 = go.Box(name = 'Rater 1',
-        			y=y0)
+                    y=y0)
     
     # Define the box-plot  relates to rater 2
     trace1 = go.Box(y=y1,
-        			name = 'Rater 2')
+                    name = 'Rater 2')
     
     # List of data to plot
     data = [trace0, trace1]
     
     # Set up the layout
     layout = go.Layout(title='Distribution of the scores given by the raters',
-    				   # Give labels to the axis
-                	   xaxis=dict(title='Raters'),
-                	   yaxis=dict(title='Scores'))
-                	   
+               # Give labels to the axis
+                       xaxis=dict(title='Raters'),
+                       yaxis=dict(title='Scores'))
+                       
     # Define the figure and plot it            	   
     fig = go.Figure(data=data, layout=layout)
     py.iplot(fig, filename='rater-distr')
@@ -56,33 +58,33 @@ def boxplot_raters(label_1, label_2):
     
 
 def stacked_plot(label_1, label_2):
-	""" This funtion creates a plot that shows the cumulative percentage of the labels 
-	given by the raters.
-	
-	It takes as inputs:
-	@label_1: the array of labels given by rater 1
-	@label_2: the array of labels given by rater 2"""
-	
-	# Cumulative values
+    """ This funtion creates a plot that shows the cumulative percentage of the labels 
+    given by the raters.
+    
+    It takes as inputs:
+    @label_1: the array of labels given by rater 1
+    @label_2: the array of labels given by rater 2"""
+    
+    # Cumulative values
     frequ_label_1 = list(np.cumsum(label_1.value_counts())/len(label_1))
     frequ_label_2 = list(np.cumsum(label_2.value_counts())/len(label_2))
     
     
     trace1 = go.Bar(x=['Very light skin', 'Light skin', 'Neither dark nor light skin', 'Dark skin', 'Very dark skin'],
-        			y=frequ_label_1,
-        			name='Rater 1')
+                    y=frequ_label_1,
+                    name='Rater 1')
     
     trace2 = go.Bar(x=['Very light skin', 'Light skin', 'Neither dark nor light skin', 'Dark skin', 'Very dark skin'],
-        	        y=frequ_label_2,
-        			name='Rater 2')
+                    y=frequ_label_2,
+                    name='Rater 2')
 
-	# Define the data
+    # Define the data
     data = [trace1, trace2]
     
     
     layout = go.Layout(barmode='stack',
-        			   title = 'Cumulative percentage of skin tone classes present in the sample',
-         			   yaxis = dict(title='Cumulaative percentage'),
+                       title = 'Cumulative percentage of skin tone classes present in the sample',
+                       yaxis = dict(title='Cumulaative percentage'),
                        xaxis = dict(title='Skin tone'))
 
     fig = go.Figure(data=data, layout=layout)
@@ -90,17 +92,17 @@ def stacked_plot(label_1, label_2):
     
     
 def error_bars(couples_estimators, average_f_score, std_f_score):
-	""" This function create the errors bar plot for the average f-scores obtained by the CV.
-	
-	It takes as inputs:
-	@couples_estimators: couple of estimators used for the CV
-	@average_f_score: vector of the average f_score
-	@std_f_score: vector of std of the f_scor for each step of the CV"""
+    """ This function create the errors bar plot for the average f-scores obtained by the CV.
+    
+    It takes as inputs:
+    @couples_estimators: couple of estimators used for the CV
+    @average_f_score: vector of the average f_score
+    @std_f_score: vector of std of the f_scor for each step of the CV"""
     
     data = [go.Scatter(x = list(range(len(couples_estimators))),
-            		   y = average_f_score,
-            		   error_y=dict(type='data',
-                	   array = std_f_score,
+                       y = average_f_score,
+                       error_y=dict(type='data',
+                       array = std_f_score,
                        visible=True))]
     
     layout = dict(title = 'Standard deviation of Fbeta scores',
@@ -166,67 +168,67 @@ def bubble_plot(labels, players, additional_attr, fun_add, attr_x, fun_x, attr_y
 
     # Define the bubbles related to each League
     trace0 = go.Scatter(x=players_club['weight'][players_club['leagueCountry'] == 'Germany'],
-        			    y=players_club['height'][players_club['leagueCountry'] == 'Germany'],
-        				mode='markers',
-        				name='Germany',
-        				text=players_club['text'][players_club['leagueCountry'] == 'Germany'],
-       				    marker=dict(symbol='circle',
-            						sizemode='diameter',
-            						sizeref=0.85,
-            						size=players_club['size'][players_club['leagueCountry'] == 'Germany'],
-            			line=dict(width=2)))
+                        y=players_club['height'][players_club['leagueCountry'] == 'Germany'],
+                        mode='markers',
+                        name='Germany',
+                        text=players_club['text'][players_club['leagueCountry'] == 'Germany'],
+                        marker=dict(symbol='circle',
+                                    sizemode='diameter',
+                                    sizeref=0.85,
+                                    size=players_club['size'][players_club['leagueCountry'] == 'Germany'],
+                        line=dict(width=2)))
 
     trace1 = go.Scatter(x=players_club['weight'][players_club['leagueCountry'] == 'France'],
-        			    y=players_club['height'][players_club['leagueCountry'] == 'France'],
-        				mode='markers',
-        				name='France',
-        				text=players_club['text'][players_club['leagueCountry'] == 'France'],
-        				marker=dict(symbol='circle',
-            					    sizemode='diameter',
-             						sizeref=0.85,
-            			size=players_club['size'][players_club['leagueCountry'] == 'France'],
-            			line=dict(width=2)))
+                        y=players_club['height'][players_club['leagueCountry'] == 'France'],
+                        mode='markers',
+                        name='France',
+                        text=players_club['text'][players_club['leagueCountry'] == 'France'],
+                        marker=dict(symbol='circle',
+                                    sizemode='diameter',
+                                    sizeref=0.85,
+                        size=players_club['size'][players_club['leagueCountry'] == 'France'],
+                        line=dict(width=2)))
 
     trace2 = go.Scatter(x=players_club['weight'][players_club['leagueCountry'] == 'England'],
-        				y=players_club['height'][players_club['leagueCountry'] == 'England'],
-        				mode='markers',
-        				name='England',
-        				text=players_club['text'][players_club['leagueCountry'] == 'England'],
-        				marker=dict(symbol='circle',
-            						sizemode='diameter',
-            						sizeref=0.85,
-            						size=players_club['size'][players_club['leagueCountry'] == 'England'],
-            						line=dict(width=2)))
+                        y=players_club['height'][players_club['leagueCountry'] == 'England'],
+                        mode='markers',
+                        name='England',
+                        text=players_club['text'][players_club['leagueCountry'] == 'England'],
+                        marker=dict(symbol='circle',
+                                    sizemode='diameter',
+                                    sizeref=0.85,
+                                    size=players_club['size'][players_club['leagueCountry'] == 'England'],
+                                    line=dict(width=2)))
 
     trace3 = go.Scatter(x=players_club['weight'][players_club['leagueCountry'] == 'Spain'],
-        				y=players_club['height'][players_club['leagueCountry'] == 'Spain'],
-        				mode='markers',
-        				name='Spain',
-        				text=players_club['text'][players_club['leagueCountry'] == 'Spain'],
-        				marker=dict(symbol='circle',
-            						sizemode='diameter',
-            						sizeref=0.85,
-            						size=players_club['size'][players_club['leagueCountry'] == 'Spain'],
-            						line=dict(width=2)))
+                        y=players_club['height'][players_club['leagueCountry'] == 'Spain'],
+                        mode='markers',
+                        name='Spain',
+                        text=players_club['text'][players_club['leagueCountry'] == 'Spain'],
+                        marker=dict(symbol='circle',
+                                    sizemode='diameter',
+                                    sizeref=0.85,
+                                    size=players_club['size'][players_club['leagueCountry'] == 'Spain'],
+                                    line=dict(width=2)))
 
 
     data = [trace0, trace1, trace2, trace3]
     
     layout = go.Layout(title='Weight vs. Height',
-        			   xaxis=dict(title='Average weight in the club',
-            					  gridcolor='rgb(255, 255, 255)',
-            					  range=[60, 95],
-            					  zerolinewidth=1,
-            					  ticklen=5,
+                          xaxis=dict(title='Average weight in the club',
+                                  gridcolor='rgb(255, 255, 255)',
+                                  range=[60, 95],
+                                  zerolinewidth=1,
+                                  ticklen=5,
                                   gridwidth=2),
-        			   yaxis=dict(title='Average height in the club',
-            					  gridcolor='rgb(255, 255, 255)',
-            					  range=[170, 195],
-            					  zerolinewidth=1,
-            					  ticklen=5,
-            					  gridwidth=2),
-        			   paper_bgcolor='rgb(243, 243, 243)',
-        			   plot_bgcolor='rgb(243, 243, 243)')
+                          yaxis=dict(title='Average height in the club',
+                                  gridcolor='rgb(255, 255, 255)',
+                                  range=[170, 195],
+                                  zerolinewidth=1,
+                                  ticklen=5,
+                                  gridwidth=2),
+                       paper_bgcolor='rgb(243, 243, 243)',
+                       plot_bgcolor='rgb(243, 243, 243)')
 
     fig = go.Figure(data=data, layout=layout)
     py.iplot(fig, filename='players-physics')
@@ -251,13 +253,13 @@ def boxplot_plotly(players, labels, feature):
     y1 = players_referee[feature][players_referee['label']==1]
 
     trace0 = go.Box(y=y0,
-        			name = 'Light skin')
+                    name = 'Light skin')
     
     trace1 = go.Box(y=y1,
-        			name = 'Dark skin')
+                    name = 'Dark skin')
 
     layout = go.Layout(title='Distribution of the Average ' + feature + ' on the two classes',
-            		   xaxis=dict(title='Classes'),
+                       xaxis=dict(title='Classes'),
                        yaxis=dict(title='Average'+ feature))
     
     data = [trace0, trace1]
@@ -278,20 +280,20 @@ def scatter_plot(players, labels):
     players_referee['label'] = labels
     
     trace0 = go.Scatter(x = players_referee['meanIAT'][players_referee['label'] == 0],
-        			    y = players_referee['yellowCards'][players_referee['label'] == 0],
-        				name = 'Light Skin Color',
-        				mode = 'markers',
-        				marker = dict(size = 8,
-            						  color = 'rgba(152, 0, 0, .8)',
-            			line = dict(width = 2,color = 'rgb(0, 0, 0)')))
+                        y = players_referee['yellowCards'][players_referee['label'] == 0],
+                        name = 'Light Skin Color',
+                        mode = 'markers',
+                        marker = dict(size = 8,
+                                      color = 'rgba(152, 0, 0, .8)',
+                        line = dict(width = 2,color = 'rgb(0, 0, 0)')))
 
     trace1 = go.Scatter(x = players_referee['meanIAT'][players_referee['label'] == 1],
-        				y = players_referee['yellowCards'][players_referee['label'] == 1],
-        				name = 'Dark Skin Color',
-        				mode = 'markers',
-        				marker = dict(size = 8,
-            						  color = 'rgba(255,255,0,0.8)',
-            			line = dict(width = 2)))
+                        y = players_referee['yellowCards'][players_referee['label'] == 1],
+                        name = 'Dark Skin Color',
+                        mode = 'markers',
+                        marker = dict(size = 8,
+                                      color = 'rgba(255,255,0,0.8)',
+                        line = dict(width = 2)))
 
     data = [trace0, trace1]
 
@@ -303,48 +305,48 @@ def scatter_plot(players, labels):
     py.iplot(fig, filename='styled-scatter-y')
 
 """---------------------------------------------------------------------------------------
-						Function to analyse CV scored
+                        Function to analyse CV scored
 ---------------------------------------------------------------------------------------"""    
     
 def train_test_plot(couples_estimators, average_roc_train, average_roc_test, average_fbeta_train, average_fbeta_test, plot_name):
-	""" This function plot the train and the test AUC, F-beta scores.
-	
-	It takes as inputs:
-	@couples_estimators: couple of estimators used for the CV
-	@average_roc_train: vector of average auc in the train cv
-	@average_roc_test: vector of average auc in the test cv
-	@average_fbeta_train: vector of average f_beta in the train cv
-	@average_fbeta_test: vector of average f_beta in the tests cv
-	@plot_name: name of the plot (str)"""
+    """ This function plot the train and the test AUC, F-beta scores.
+    
+    It takes as inputs:
+    @couples_estimators: couple of estimators used for the CV
+    @average_roc_train: vector of average auc in the train cv
+    @average_roc_test: vector of average auc in the test cv
+    @average_fbeta_train: vector of average f_beta in the train cv
+    @average_fbeta_test: vector of average f_beta in the tests cv
+    @plot_name: name of the plot (str)"""
     
     random_x = np.array(range(len(couples_estimators)))
 
     # Create traces
     trace0 = go.Scatter(x = random_x,
-        				y = np.array(average_roc_train),
-        				mode = 'lines',
-        				name = 'Train ROC score')
-        				
+                        y = np.array(average_roc_train),
+                        mode = 'lines',
+                        name = 'Train ROC score')
+                        
     trace1 = go.Scatter(x = random_x,
-        				y = np.array(average_roc_test),
-        				mode = 'lines+markers',
-        				name = 'Test ROC score')
+                        y = np.array(average_roc_test),
+                        mode = 'lines+markers',
+                        name = 'Test ROC score')
     
     trace2 = go.Scatter(x = random_x,
-        				y = np.array(average_fbeta_train),
-        				mode = 'lines',
-        				name = 'Train Fbeta-score')
-        				
+                        y = np.array(average_fbeta_train),
+                        mode = 'lines',
+                        name = 'Train Fbeta-score')
+                        
     trace3 = go.Scatter(x = random_x,
-        				y = np.array(average_fbeta_test),
-        				mode = 'lines+markers',
-        				name = 'Test Fbeta-score')
+                        y = np.array(average_fbeta_test),
+                        mode = 'lines+markers',
+                        name = 'Test Fbeta-score')
 
     data = [trace0, trace1, trace2, trace3]
     
     layout = go.Layout(title='Compare train and test AUC and Fbeta',
-             		   xaxis=dict(title='Couple of parameters'),
-            		   yaxis=dict(title='AUC, Fbeta'))
+                       xaxis=dict(title='Couple of parameters'),
+                       yaxis=dict(title='AUC, Fbeta'))
     
     fig = go.Figure(data=data, layout=layout)
     py.iplot(fig, filename=plot_name)
@@ -361,10 +363,10 @@ def plot_cv_scores(n_fold, cv_scores):
 
     # Create and style traces
     trace0 = go.Scatter(x = folds,
-        				y = cv_scores,
-        				name = 'F',
-        				line = dict(color = ('rgb(205, 12, 24)'),
-            					    width = 4))
+                        y = cv_scores,
+                        name = 'F',
+                        line = dict(color = ('rgb(205, 12, 24)'),
+                                    width = 4))
 
     data = [trace0]
 
@@ -378,7 +380,7 @@ def plot_cv_scores(n_fold, cv_scores):
     py.iplot(fig, filename='auc-cv')
 
 """---------------------------------------------------------------------------------------
-						Function to analyse the futures importance
+                        Function to analyse the futures importance
 ---------------------------------------------------------------------------------------"""    
     
 def plot_features_importance(players, importances):
@@ -391,20 +393,20 @@ def plot_features_importance(players, importances):
     
     
     trace0 = go.Bar(x=list(players.columns),
-    				y=list(importances),
-    				marker=dict(color=['rgba(222,45,38,0.8)', 'rgba(222,45,38,0.8)',
-               						   'rgba(222,45,38,0.8)', 'rgba(222,45,38,0.8)',
-               						   'rgba(222,45,38,0.8)', 'rgba(222,45,38,0.8)', 
-               						   'rgba(204,204,204,1)', 'rgba(204,204,204,1)', 
-               						   'rgba(204,204,204,1)', 'rgba(204,204,204,1)',
-               						   'rgba(204,204,204,1)','rgba(204,204,204,1)',
-               						   'rgba(204,204,204,1)','rgba(204,204,204,1)']))
+                    y=list(importances),
+                    marker=dict(color=['rgba(222,45,38,0.8)', 'rgba(222,45,38,0.8)',
+                                       'rgba(222,45,38,0.8)', 'rgba(222,45,38,0.8)',
+                                       'rgba(222,45,38,0.8)', 'rgba(222,45,38,0.8)', 
+                                       'rgba(204,204,204,1)', 'rgba(204,204,204,1)', 
+                                       'rgba(204,204,204,1)', 'rgba(204,204,204,1)',
+                                       'rgba(204,204,204,1)','rgba(204,204,204,1)',
+                                       'rgba(204,204,204,1)','rgba(204,204,204,1)']))
 
     data = [trace0]
     
     layout = go.Layout(title='Feature importance',
-        			   xaxis=dict(title='Features'),
-                	   yaxis=dict(title='Importance'))
+                       xaxis=dict(title='Features'),
+                       yaxis=dict(title='Importance'))
 
     fig = go.Figure(data=data, layout=layout)
     py.iplot(fig, filename='color-bar')
@@ -425,34 +427,34 @@ def balance_cv_plot(f1_score_X1, f1_score_X2, f1_score_X3, f1_score_X4, f1_score
 
     # Create and style traces
     trace0 = go.Scatter(x = folds,
-        				y = f1_score_X1,
-        				name = 'F score X1',
-        				line = dict(color = ('rgb(205, 12, 24)'),
-            					    width = 2))
+                        y = f1_score_X1,
+                        name = 'F score X1',
+                        line = dict(color = ('rgb(205, 12, 24)'),
+                                    width = 2))
     
     trace1 = go.Scatter(x = folds,
-        				y = f1_score_X2,
-        				name = 'F score X2',
-        				line = dict(color = ('rgb(22, 96, 167)'),
-            					    width = 2,))
+                        y = f1_score_X2,
+                        name = 'F score X2',
+                        line = dict(color = ('rgb(22, 96, 167)'),
+                                    width = 2,))
     
     trace2 = go.Scatter(x = folds,
-        				y = f1_score_X3,
-        				name = 'F score X3',
-        				line = dict(color = ('rgb(205, 12, 24)'),
-            						width = 2))
-            						
+                        y = f1_score_X3,
+                        name = 'F score X3',
+                        line = dict(color = ('rgb(205, 12, 24)'),
+                                    width = 2))
+            
     trace3 = go.Scatter(x = folds,
-        				y = f1_score_X4,
-        				name = 'F score X4',
-        				line = dict(color = ('rgb(22, 96, 167)'),
-            						width = 2))
-            						
+                        y = f1_score_X4,
+                        name = 'F score X4',
+                        line = dict(color = ('rgb(22, 96, 167)'),
+                                    width = 2))
+            
     trace4 = go.Scatter(x = folds,
-        				y = f1_score_X5,
-        				name = 'F score X5',
-        				line = dict(color = ('rgb(205, 12, 24)'),
-            						width = 2))
+                        y = f1_score_X5,
+                        name = 'F score X5',
+                        line = dict(color = ('rgb(205, 12, 24)'),
+                                    width = 2))
 
     data = [trace0, trace1, trace2, trace3, trace4]
 
@@ -529,7 +531,7 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
     
     plt.grid()
     
-	# Plot the "confidence bands"
+    # Plot the "confidence bands"
     plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
                      train_scores_mean + train_scores_std, alpha=0.1,
                      color="r")
@@ -541,8 +543,8 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
              label="Training score")
     plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
              label="Cross-validation score")
-	
-	# Add the legend
+    
+    # Add the legend
     plt.legend(loc="best")
     
     return plt  
