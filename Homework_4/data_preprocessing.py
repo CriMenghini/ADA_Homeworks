@@ -49,11 +49,20 @@ def preprocess_labels(label):
     
 
 def encode_string_variable(df, attribute):
+	""" The fuction encodes the attributes of type 'object'. It uses the sklearn function
+	LabelEncoder. To each different string is associated an integer. 
+	
+	It takes as inputs:
+	@df: the dataframe that contain the variable to be processed
+	@attribute: the name of the attribute to process (str)"""
     
+    # Fill the NaN with 'Unknown'
     df[attribute] = df[attribute].fillna('Unknown')
     
+    # Define the encoder for the attribute
     le = preprocessing.LabelEncoder()
     
+    # Apply the encoder
     le.fit(df[attribute])
     
     df[attribute] = le.transform(df[attribute]) 
