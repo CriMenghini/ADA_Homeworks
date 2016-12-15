@@ -7,9 +7,12 @@ Created on Thu Dec 15 11:55:49 2016
 
 import nltk
 import string
+import numpy as np
+from matplotlib import cm
 import matplotlib.pyplot as plt
 from nltk.corpus import stopwords
 from collections import defaultdict
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 
 def clean_entire_corpus(unique_corpus, length, extra):
@@ -166,4 +169,208 @@ def plot_mentions(dict_big_mentions):
     plt.ylabel('No. Mentions')
     plt.xlabel('Countries')
     plt.title('Country mentions')
+    plt.show()
+    
+
+def demo_liu_hu_lexicon(sentence):
+    """ THIS IS JUST BIT MODIFIED 
+    Basic example of sentiment classification using Liu and Hu opinion lexicon.
+    This function simply counts the number of positive, negative and neutral words
+    in the sentence and classifies it depending on which polarity is more represented.
+    Words that do not appear in the lexicon are considered as neutral.
+
+    :param sentence: a sentence whose polarity has to be classified.
+    :param plot: if True, plot a visual representation of the sentence polarity.
+    """
+    from nltk.corpus import opinion_lexicon
+
+    pos_words = 0
+    neg_words = 0
+
+    y = []
+
+    for word in sentence:
+        if word in opinion_lexicon.positive():
+            pos_words += 1
+            y.append(1) # positive
+        elif word in opinion_lexicon.negative():
+            neg_words += 1
+            y.append(-1) # negative
+        else:
+            y.append(0) # neutral
+
+    if pos_words > neg_words:
+        return 'Positive'
+    elif pos_words < neg_words:
+        return 'Negative'
+    elif pos_words == neg_words:
+        return 'Neutral'
+
+
+def country_mentions_sentiment_vader(country_dictionary, country_set, emails):
+    """ This function returns a dictionary that counts the number of email where a country is mentioned.
+    It takes as inputs:
+    
+    @country_dictionary: is the dictionary (key,value):(name_country:[listi other codes])
+    @country_set: set of all possible way of representing the countries
+    @emails: dataframe that contains the data
+    """
+    
+    # Initialize the dictionary
+    mentions_dictionary = defaultdict(int)
+    sentiment_dictionary = {}
+
+    for country in list(country_dictionary.keys()):
+        sentiment_dictionary[country] = {}
+        sentiment_dictionary[country]['pos'] = []
+        sentiment_dictionary[country]['neg'] = []
+    
+    # Train the sentiment analysis
+    analyzer = SentimentIntensityAnalyzer()
+
+    # Get the manes of all the countries
+    keys = list(country_dictionary.keys())
+
+    # For each email
+    for mail in emails['ExtractedBodyText_2']:
+
+        mail_text = ' '.join(mail)
+
+        polarity = analyzer.polarity_scores(mail_text)
+
+
+        # Check whether each word is or not in the set of countries
+        for i in set(mail):
+
+            # Whether there is:
+            if i in country_set:  
+
+                # In order to identify which country we are talking about
+                for k in keys:
+
+                    # Whether in the text we found exactly the name, we add the count to the dictionary
+                    if k == i:
+                        mentions_dictionary[k] += 1
+
+                        #sentiment_dictionary[k] = defaultdict(list)
+
+                        sentiment_dictionary[k]['pos'] += [polarity['pos']]
+                        sentiment_dictionary[k]['neg'] += [polarity['neg']]
+
+                    # Otherwise go through the list of other ways to express the country
+                    else:                        
+                        values = country_dictionary[k]
+
+                        for v in values:
+                            # And store it whether found
+                            if v == i:
+                                mentions_dictionary[k] += 1     
+
+                                #sentiment_dictionary[k] =defaultdict(list)
+
+                                sentiment_dictionary[k]['pos'] += [polarity['pos']]
+                                sentiment_dictionary[k]['neg'] += [polarity['neg']]
+
+    return mentions_dictionary, sentiment_dictionary
+
+
+def sentiment_liu(country_dictionary, country_set, emails):
+    """ This funtion returns a dictionary that contains for each country (key) a list of the sentiment of the emails
+    where the country is mentioned.
+    
+    It takes as inputs:
+    
+    @country_dictionary: is the dictionary (key,value):(name_country:[listi other codes])
+    @country_set: set of all possible way of representing the countries
+    @emails: dataframe that contains the data"""
+    
+    # Initialize the dictionary
+    sentiment_dictionary = {}
+
+    for country in list(country_dictionary.keys()):
+        sentiment_dictionary[country] = {}
+        sentiment_dictionary[country]['sentiment'] = []
+
+    # Get the manes of all the countries
+    keys = list(country_dictionary.keys())
+    s= 0
+    # For each email
+    for mail in emails['ExtractedBodyText_2']:
+        print (s)
+        
+
+        polarity = demo_liu_hu_lexicon(mail)
+
+
+        # Check whether each word is or not in the set of countries
+        for i in set(mail):
+
+            # Whether there is:
+            if i in country_set:  
+
+                # In order to identify which country we are talking about
+                for k in keys:
+
+                    # Whether in the text we found exactly the name, we add the count to the dictionary
+                    if k == i:
+
+                        if polarity == 'Positive':
+                            sentiment_dictionary[k]['sentiment'] += [1]
+                        elif polarity == 'Negative':
+                            sentiment_dictionary[k]['sentiment'] += [-1]
+                        elif polarity == 'Neutral':
+                            sentiment_dictionary[k]['sentiment'] += [0]
+
+
+
+                    # Otherwise go through the list of other ways to express the country
+                    else:                        
+                        values = country_dictionary[k]
+
+                        for v in values:
+                            # And store it whether found
+                            if v == i:
+
+                                if polarity == 'Positive':
+                                    sentiment_dictionary[k]['sentiment'] += [1]
+                                elif polarity == 'Negative':
+                                    sentiment_dictionary[k]['sentiment'] += [-1]
+                                elif polarity == 'Neutral':
+                                    sentiment_dictionary[k]['sentiment'] += [0]
+      
+        s += 1
+   
+    return sentiment_dictionary         
+
+
+
+
+def plot_sentiment(df_sentiment):
+    """ ---------------------------------------------------------
+    CREDITS TO: 
+    http://stackoverflow.com/questions/31313606/pyplot-matplotlib
+    -bar-chart-with-fill-color-depending-on-value 
+    ------------------------------------------------------------
+
+    This function plot the sentiment analysis for the country. 
+    
+    It takes as input:
+    
+    @df_sentiment"""
+    
+    # Set up colors : red to green
+    plt.figure(figsize=(17,6))
+    y = np.array(df_sentiment['sentiment'])
+    colors = cm.YlGn(y / float(max(y)))
+    plot = plt.scatter(y, y, c=y, cmap = 'YlGn')
+    plt.clf()
+    clb = plt.colorbar(plot)
+    clb.ax.set_title("Sentiment")
+
+    # Display bar plot : country frequency vs. country name, with color indicating polarity score
+    plt.bar(range(df_sentiment.shape[0]), df_sentiment['mention'], tick_label=df_sentiment.index, color=colors)
+    plt.xticks(rotation=45, ha='right')
+    plt.xlabel("Country")
+    plt.ylabel("Mentions")
+    plt.title('Sentiment analysis per country', fontsize = 15)
     plt.show()
