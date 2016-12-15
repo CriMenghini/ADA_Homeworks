@@ -296,7 +296,7 @@ def sentiment_liu(country_dictionary, country_set, emails):
     s= 0
     # For each email
     for mail in emails['ExtractedBodyText_2']:
-        print (s)
+        # print (s)
         
 
         polarity = demo_liu_hu_lexicon(mail)
